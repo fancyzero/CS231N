@@ -32,11 +32,23 @@ def softmax_loss_naive(W, X, y, reg):
     #############################################################################
     N = X.shape[0]
     for idx in range(N):
-        scores = X[idx].dot(W)
-        loss += -np.log(np.exp(scores[y[idx]]) / np.sum(np.exp(scores)))
+        example = X[idx]
+        scores = example.dot(W)
+        scores -= np.max(scores)
+        s_exp = np.exp(scores)
+        sum_s_exp = np.sum(s_exp)
 
+        loss += -np.log(s_exp[y[idx]] / sum_s_exp)
+        for c in range(dW.shape[1]):  # for each column
+            ex = s_exp[c]
+            if c == y[idx]:
+                dW.T[c] += (ex / sum_s_exp - 1.0) * example
+            else:
+                dW.T[c] += ex / sum_s_exp * example
     loss /= N
-
+    loss += reg * np.sum(W*W)
+    dW /= N
+    dW += 2*W*reg
     #############################################################################
     #                          END OF YOUR CODE                                 #
     #############################################################################
@@ -60,7 +72,21 @@ def softmax_loss_vectorized(W, X, y, reg):
     # here, it is easy to run into numeric instability. Don't forget the        #
     # regularization!                                                           #
     #############################################################################
-    pass
+    N = X.shape[0]
+    scores = X.dot(W)
+    maxs = np.max(scores,axis=1)
+    scores -= maxs[:,np.newaxis]
+    scores = np.exp(scores)
+    sum_s = np.sum(scores, axis=1)
+    ccs = scores[range(scores.shape[0]),y]
+    loss = -np.log(ccs/sum_s)
+    loss = np.sum(loss)
+    loss /= N
+    loss += reg * np.sum(W*W)
+    dw_ccs
+    dw_ics
+    dW /= N
+    dW += 2*W*reg
     #############################################################################
     #                          END OF YOUR CODE                                 #
     #############################################################################
