@@ -37,7 +37,6 @@ def softmax_loss_naive(W, X, y, reg):
         scores -= np.max(scores)
         s_exp = np.exp(scores)
         sum_s_exp = np.sum(s_exp)
-
         loss += -np.log(s_exp[y[idx]] / sum_s_exp)
         for c in range(dW.shape[1]):  # for each column
             ex = s_exp[c]
@@ -46,9 +45,9 @@ def softmax_loss_naive(W, X, y, reg):
             else:
                 dW.T[c] += ex / sum_s_exp * example
     loss /= N
-    loss += reg * np.sum(W*W)
+    loss += reg * np.sum(W * W)
     dW /= N
-    dW += 2*W*reg
+    dW += 2 * W * reg
     #############################################################################
     #                          END OF YOUR CODE                                 #
     #############################################################################
@@ -73,20 +72,23 @@ def softmax_loss_vectorized(W, X, y, reg):
     # regularization!                                                           #
     #############################################################################
     N = X.shape[0]
-    scores = X.dot(W)
-    maxs = np.max(scores,axis=1)
-    scores -= maxs[:,np.newaxis]
-    scores = np.exp(scores)
-    sum_s = np.sum(scores, axis=1)
-    ccs = scores[range(scores.shape[0]),y]
-    loss = -np.log(ccs/sum_s)
+    scores = X.dot(W)  # N,C
+    max_score = np.max(scores, axis=1)
+    scores -= max_score[:, np.newaxis]
+    scores_exp = np.exp(scores)  # N,C
+    sum_scores_exp = np.sum(scores_exp, axis=1)  # N
+    scores_exp_correct_label = scores_exp[range(scores.shape[0]), y]
+    loss = -np.log(scores_exp_correct_label / sum_scores_exp)
     loss = np.sum(loss)
     loss /= N
-    loss += reg * np.sum(W*W)
-    dw_ccs
-    dw_ics
+    loss += reg * np.sum(W * W)
+
+    # gradient
+    a = scores_exp / sum_scores_exp[:, np.newaxis]
+    a[range(N), y] -= 1
+    dW = X.T.dot(a)  # D,N dot N,C
     dW /= N
-    dW += 2*W*reg
+    dW += 2 * W * reg
     #############################################################################
     #                          END OF YOUR CODE                                 #
     #############################################################################
