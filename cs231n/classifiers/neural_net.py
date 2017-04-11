@@ -78,7 +78,6 @@ class TwoLayerNet(object):
         hidden = X.dot(W1)
         hidden_p_b1 = hidden+b1
         max0_hidden = np.maximum(0,hidden_p_b1)
-
         output = max0_hidden.dot(W2)
         scores = output + b2
         #############################################################################
@@ -127,20 +126,20 @@ class TwoLayerNet(object):
 
         d_scores = np.ones_like(scores) * d_loss
         d_output = np.ones_like(output) * d_loss
-        d_b2 = np.sum( d_scores.shape[0])
+        d_b2 = d_scores.shape[0]
         d_max0_hidden = d_output.dot(W2.T)
         d_W2 = max0_hidden.T.dot(d_output)
         d_npmax = (max0_hidden>0).astype(int)*d_max0_hidden
         d_hidden_p_b1 = d_npmax
         d_hidden = d_hidden_p_b1
-        d_b1 = np.sum(hidden.shape[0]) * d_hidden
+        d_b1 = np.sum(np.ones_like(b1)*(max0_hidden>0).astype(int),axis=0)
+
         d_W1 = X.T.dot(d_hidden)
 
         grads["W1"] = d_W1
         grads["W2"] = d_W2
         grads["b1"] = d_b1
         grads["b2"] = d_b2
-
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
