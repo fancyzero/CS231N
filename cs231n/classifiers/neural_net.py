@@ -75,9 +75,12 @@ class TwoLayerNet(object):
         # Store the result in the scores variable, which should be an array of      #
         # shape (N, C).                                                             #
         #############################################################################
-        layer1 = np.maximum(0, X.dot(W1) + b1)
-        scores = layer1.dot(W2) + b2
+        hidden = X.dot(W1)
+        hidden_p_b1 = hidden+b1
+        max0_hidden = np.maximum(0,hidden_p_b1)
 
+        output = max0_hidden.dot(W2)
+        scores = output + b2
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -95,18 +98,20 @@ class TwoLayerNet(object):
         # classifier loss. So that your results match ours, multiply the            #
         # regularization loss by 0.5                                                #
         #############################################################################
+        loss = np.sum(scores)
+        # max_score = np.max(scores, axis=1)
+        # scores -= max_score[:, np.newaxis]
+        # scores_exp = np.exp(scores)  # N,C
+        # sum_scores_exp = np.sum(scores_exp, axis=1)  # N
+        # scores_exp_correct_label = scores_exp[range(scores.shape[0]), y]
+        # loss = -np.log(scores_exp_correct_label / sum_scores_exp)
+        # loss = np.sum(loss)
+        # loss /= N
+        # loss = np.sum(scores)
+        # reg_loss = np.sum(W1 * W1) * 0.5 * reg + np.sum(W2 * W2) * 0.5 * reg
+        # loss += reg_loss
 
-        # scores = np.exp(scores)
-        max_score = np.max(scores, axis=1)
-        scores -= max_score[:, np.newaxis]
-        scores_exp = np.exp(scores)  # N,C
-        sum_scores_exp = np.sum(scores_exp, axis=1)  # N
-        scores_exp_correct_label = scores_exp[range(scores.shape[0]), y]
-        loss = -np.log(scores_exp_correct_label / sum_scores_exp)
-        loss = np.sum(loss)
-        loss /= N
-        reg_loss = np.sum(W1 * W1) * 0.5 * reg + np.sum(W2 * W2) * 0.5 * reg
-        loss += reg_loss
+
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -118,8 +123,24 @@ class TwoLayerNet(object):
         # and biases. Store the results in the grads dictionary. For example,       #
         # grads['W1'] should store the gradient on W1, and be a matrix of same size #
         #############################################################################
+        d_loss = 1
 
-        grads["W1"] = X.T.dot((layer1>0).astype(int))
+        d_scores = np.ones_like(scores) * d_loss
+        d_output = np.ones_like(output) * d_loss
+        d_b2 = np.sum( d_scores.shape[0])
+        d_max0_hidden = d_output.dot(W2.T)
+        d_W2 = max0_hidden.T.dot(d_output)
+        d_npmax = (max0_hidden>0).astype(int)*d_max0_hidden
+        d_hidden_p_b1 = d_npmax
+        d_hidden = d_hidden_p_b1
+        d_b1 = np.sum(hidden.shape[0]) * d_hidden
+        d_W1 = X.T.dot(d_hidden)
+
+        grads["W1"] = d_W1
+        grads["W2"] = d_W2
+        grads["b1"] = d_b1
+        grads["b2"] = d_b2
+
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
