@@ -112,18 +112,14 @@ class TwoLayerNet(object):
         #############################################################################
 
         # Backward pass: compute gradients
-        grads = {"W1": 0, "W2": 0, "b1": 0, "b2": 0}
+        grads = {}
         #############################################################################
         # TODO: Compute the backward pass, computing the derivatives of the weights #
         # and biases. Store the results in the grads dictionary. For example,       #
         # grads['W1'] should store the gradient on W1, and be a matrix of same size #
         #############################################################################
-        a = scores_exp / sum_scores_exp[:, np.newaxis]
-        a[range(N), y] -= 1
-        dW1 = layer1.T.dot(a)  # D,N dot N,C
-        dW1 /= N
-        dW1 += W1 * reg
-        grads["W1"] = dW1
+
+        grads["W1"] = X.T.dot((layer1>0).astype(int))
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
